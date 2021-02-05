@@ -1089,7 +1089,7 @@ ShTHistManager::saveRatioPlot( const String&        outputDir,
     }
     pNum->Draw( option.c_str( ) );
     pDen->Draw( ( option + "same" ).c_str( ) );
-    ATLASLabel( 0.18, 0.8, "Work in Progress", 1, 0.05 );
+    // ATLASLabel( 0.18, 0.8, "Work in Progress", 1, 0.05 );
     ShTUtil::CreateDrawText( 0.18, 0.7, "#sqrt{s} = 13 TeV, #intLdt = 79.8 fb^{-1}", 0.07 );
 
     cvs.cd( 2 );
@@ -1191,7 +1191,7 @@ ShTHistManager::saveRatioPlot( const String&        outputDir,
     }
     if( isLogY == true ) cvs.SetLogy( 0 );
     pLeg->Draw( );
-    ATLASLabel( 0.18, 0.85, "Internal", 1, 0.07 );
+    // ATLASLabel( 0.18, 0.85, "Internal", 1, 0.07 );
     ShTUtil::CreateDrawText( 0.18, 0.73, "#sqrt{s} = 13 TeV, #intLdt = 79.8 fb^{-1}", 0.07 );
 
     cvs.cd( 2 );

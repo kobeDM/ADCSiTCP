@@ -6,9 +6,7 @@
 #include "inc/rootutil.h"
 #include "inc/physutil.h"
 
-#include "inc/AtlasLabels.h"
-#include "inc/AtlasUtils.h"
-#include "inc/AtlasStyle.h"
+#include "inc/shStyle.h"
 #include "inc/histmanager.h"
 
 #ifdef __CLING__
@@ -16,9 +14,7 @@
 #include "src/rootutil.cc"
 #include "src/physutil.cc"
 
-#include "src/AtlasLabels.C"
-#include "src/AtlasUtils.C"
-#include "src/AtlasStyle.C"
+#include "src/shStyle.cc"
 #include "src/histmanager.C"
 #endif
 

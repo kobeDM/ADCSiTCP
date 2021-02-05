@@ -1,8 +1,8 @@
 #include "inc/shinclude.h"
 
-void dumpAllWaveforms( const String& inputFile )
+void dumpAllWaveforms( const String& inputFile, const String& outputFile )
 {
-    SetAtlasStyle( );
+    SetShStyle( );
 
     TCanvas cvs( "cvs", "cvs", 800, 600 );
     gPad->SetRightMargin( 0.2 );
@@ -15,7 +15,7 @@ void dumpAllWaveforms( const String& inputFile )
     TColor::CreateGradientColorTable( NRGBs, stops, red, green, blue, NCont );
     gStyle->SetNumberContours( NCont );
     
-    TH2F hist( "hist", "hist", 128, 0.0, 128.0, 4096, 0.0, 4096.0 );
+    TH2F hist( "hist", "hist", 2048, 0.0, 2048.0, 4096, 0.0, 4096.0 );
 
     std::ifstream ifs;
     ifs.open( inputFile );
@@ -32,21 +32,16 @@ void dumpAllWaveforms( const String& inputFile )
         std::stringstream ss( line );
         ss >> trig >> adc;
 
-        if( adc > 2900 && clk < 80 ) DEBUG(trig);
-        
         hist.Fill( clk, adc );
         clk++;
-        if( clk >= 128 ) clk = 0;
+        if( clk >= 2048 ) clk = 0;
     }
 
     hist.GetXaxis()->SetTitle("Clock [5 MHz]");
     hist.GetYaxis()->SetTitle("ADC count");
-    hist.GetYaxis()->SetRangeUser( 2048, 4095);
-
 
     hist.Draw("colz");
-    cvs.SaveAs( "test2d.png" );
-    
+    cvs.SaveAs( Form( "%s.png", outputFile.c_str( ) ) );
     
     return;
 }

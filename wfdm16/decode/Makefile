@@ -1,10 +1,13 @@
 PROG = decode
-CFLAGS = -g -O2 -Wall
+ROOTFLAGS=-pthread -Wno-deprecated-declarations -I${ROOTSYS}/include -I./ShUtil
+CXXFLAGS=${ROOTFLAGS} -std=c++11
+ROOTLIBS=$(shell root-config --libs)
 # LDLIBS += -L/usr/local/lib/paprica -lpaprica
+OBJS=decode.o ShUtil/src/util.o ShUtil/src/rootutil.o ShUtil/src/physutil.o ShUtil/src/shStyle.o
 
 all: $(PROG)
-# OBJS += main.o
-# $(PROG): $(OBJS)
 
+$(PROG): $(OBJS)
+	g++ $(CXXFLAGS) -o $(PROG) $(OBJS) $(ROOTLIBS) -lgcc
 clean:
-	rm -f *.o $(PROG)
+	rm -f  $(PROG) $(OBJS)
