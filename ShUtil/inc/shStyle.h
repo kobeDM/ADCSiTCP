@@ -10,13 +10,13 @@
 //
 //   $Id: AtlasStyle.h, v0.0   Thu 25 Mar 2010 10:34:20 CET $
 
-#ifndef  __ATLASSTYLE_H
-#define __ATLASSTYLE_H
+#ifndef  __SHSTYLE_H
+#define __SHSTYLE_H
 
 #include <TStyle.h>
 
-extern void SetAtlasStyle();
+extern void SetShStyle();
 
-extern TStyle* AtlasStyle(); 
+extern TStyle* ShStyle(); 
 
-#endif // __ATLASSTYLE_H
+#endif // __SHSTYLE_H
