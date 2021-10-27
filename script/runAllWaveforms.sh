@@ -1,26 +1,21 @@
 BINARY=$1
 OUT_DIR=$2
+DAQ_TIME=$3
 
 python ${ADC_SITCP_WFDM_REG}/set_registers.py
 
-timeout 1 nc 192.168.10.16 24 > ${BINARY}
+timeout ${DAQ_TIME} nc 192.168.10.16 24 > ${BINARY}
 
-${ADC_SITCP_WFDM_DEC}/decode ${BINARY}
+${ADC_SITCP_WFDM_DEC}/decode ${BINARY} ${OUT_DIR}.root
 
 if [ -d ${OUT_DIR} ]; then
     echo dir-${OUT_DIR} already exists. delete.
     rm -rf ${OUT_DIR}
 fi
 mkdir ${OUT_DIR}
-mv ch_*.txt ./${OUT_DIR}/
 mv ${BINARY} ./${OUT_DIR}/
+mv ${OUT_DIR}.root ./${OUT_DIR}/
 
-EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveforms.cc
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_0.txt\",\"${OUT_DIR}/ch_0\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_1.txt\",\"${OUT_DIR}/ch_1\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_2.txt\",\"${OUT_DIR}/ch_2\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_3.txt\",\"${OUT_DIR}/ch_3\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_4.txt\",\"${OUT_DIR}/ch_4\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_5.txt\",\"${OUT_DIR}/ch_5\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_6.txt\",\"${OUT_DIR}/ch_6\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}/ch_7.txt\",\"${OUT_DIR}/ch_7\")"
+
+EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot.cc
+root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\",\"${OUT_DIR}/${OUT_DIR}\")"

@@ -24,27 +24,28 @@ def main():
     ]
     
     for ip_address in ip_address_list:
-        #board_version = get_board_version(ip_address)
         board_version = 2
 
+        print 'Set registers...'
+        
         #######################################################
         # control register (0x00000004)
         #######################################################
         # bit7: OFSET_BIN ...
-        # bit6: EDGE_SEL  ...
+        # bit6: EDGE_SEL  ... 0 : positive signal, 1: negative signal
         # bit5: TRIG_SEL  ... 00: NIM_IN 1, 01: NIM_IN 2
         # bit4: TRIG_SEL  ... 10: LOGICAL OR, 11: LOGICAL AND
         # bit3: UPCH_SEL  ...
         # bit2: COMBINE   ...
         # bit1: RATE      ... 00: 40MHz, 01: 20MHz
         # bit0: RATE      ... 10: 10MHz, 11:  5MHz
-        # rbcp.write_register_f(ip_address, 0x4,  '>B', 0x03)
-        rbcp.write_register_f(ip_address, 0x4,  '>B', 0x23)
+
+        rbcp.write_register_f(ip_address, 0x4,  '>B', 0x20)
 
         #######################################################
         # trigger position register (0x00000008, 0x00000009)
         #######################################################
-        rbcp.write_register_f(ip_address, 0x8,  '>B', 0x04)
+        rbcp.write_register_f(ip_address, 0x8,  '>B', 0x06)
         rbcp.write_register_f(ip_address, 0x9,  '>B', 0x00)
         
         #######################################################
@@ -53,7 +54,7 @@ def main():
         # 0x0000000B : ch [ 7:0]
         #######################################################
         rbcp.write_register_f(ip_address, 0xA,  '>B', 0x00)
-        rbcp.write_register_f(ip_address, 0xB,  '>B', 0xfe)
+        rbcp.write_register_f(ip_address, 0xB,  '>B', 0xe0)
 
         #######################################################
         # trigger invert register (0x0000000C, 0x0000000D)
@@ -66,36 +67,36 @@ def main():
         #######################################################
 
         ## ch 0
-        rbcp.write_register_f(ip_address, 0x20,  '>B', 0x20)
+        rbcp.write_register_f(ip_address, 0x20,  '>B', 0x30)
         rbcp.write_register_f(ip_address, 0x21,  '>B', 0x00)
 
         ## ch 1
-        rbcp.write_register_f(ip_address, 0x22,  '>B', 0x20)
+        rbcp.write_register_f(ip_address, 0x22,  '>B', 0x30)
         rbcp.write_register_f(ip_address, 0x23,  '>B', 0x00)
 
         ## ch 2
-        rbcp.write_register_f(ip_address, 0x24,  '>B', 0x20)
+        rbcp.write_register_f(ip_address, 0x24,  '>B', 0x30)
         rbcp.write_register_f(ip_address, 0x25,  '>B', 0x00)
 
         ## ch 3
-        rbcp.write_register_f(ip_address, 0x26,  '>B', 0x20)
-        rbcp.write_register_f(ip_address, 0x27,  '>B', 0x00)
+        rbcp.write_register_f(ip_address, 0x26,  '>B', 0x12)
+        rbcp.write_register_f(ip_address, 0x27,  '>B', 0xc0)
 
         ## ch 4
-        rbcp.write_register_f(ip_address, 0x28,  '>B', 0x20)
-        rbcp.write_register_f(ip_address, 0x29,  '>B', 0x00)
+        rbcp.write_register_f(ip_address, 0x28,  '>B', 0x15)
+        rbcp.write_register_f(ip_address, 0x29,  '>B', 0x30)
 
         ## ch 5
-        rbcp.write_register_f(ip_address, 0x2A,  '>B', 0x20)
-        rbcp.write_register_f(ip_address, 0x2B,  '>B', 0x00)
+        rbcp.write_register_f(ip_address, 0x2A,  '>B', 0x16)
+        rbcp.write_register_f(ip_address, 0x2B,  '>B', 0xd0)
 
         ## ch 6
-        rbcp.write_register_f(ip_address, 0x2C,  '>B', 0x20)
-        rbcp.write_register_f(ip_address, 0x2D,  '>B', 0x00)
+        rbcp.write_register_f(ip_address, 0x2C,  '>B', 0x17)
+        rbcp.write_register_f(ip_address, 0x2D,  '>B', 0x70)
 
         ## ch 7
-        rbcp.write_register_f(ip_address, 0x2E,  '>B', 0x20)
-        rbcp.write_register_f(ip_address, 0x2F,  '>B', 0x00)
+        rbcp.write_register_f(ip_address, 0x2E,  '>B', 0x19)
+        rbcp.write_register_f(ip_address, 0x2F,  '>B', 0x80)
 
         
         rbcp.write_register_f(ip_address, 0x30,  '>B', 0x0f)
@@ -122,8 +123,7 @@ def main():
         rbcp.write_register_f(ip_address, 0x3E,  '>B', 0x0f)
         rbcp.write_register_f(ip_address, 0x3F,  '>B', 0xf0)
         
-        
-        # time.sleep(0.1)
+        print 'Done!'        
 
         
 if __name__ == '__main__':
