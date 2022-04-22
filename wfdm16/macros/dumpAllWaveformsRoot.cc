@@ -8,7 +8,7 @@ void dumpAllWaveformsRoot( const String& inputFile, const String& outputFile )
     histArr.reserve( 8 );
     for( int i = 0; i < 8; ++i ) {
         String histName = Form( "hist_%d", i );
-        histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 2048, 0.0, 2048.0, 4096, 0.0, 4096.0 ) );
+        histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 2048, 0.0, 2048.0, 4096, -2048.0, 2048.0 ) );
     }
 
     TFile file( inputFile.c_str( ) );
@@ -34,12 +34,13 @@ void dumpAllWaveformsRoot( const String& inputFile, const String& outputFile )
             TH2F* pHist = histArr.at( ch );
             if( pHist == nullptr ) continue;
             for( int clk = 0; clk < 2048; ++clk ) {
+                if( fadcVar[ch][clk] > 2000 ) fadcVar[ch][clk] -= 4096;
                 pHist->Fill( clk, fadcVar[ch][clk] );
             }
         }
     }
 
-    TCanvas cvs( "cvs", "cvs", 1200, 600 );
+    TCanvas cvs( "cvs", "cvs", 1600, 600 );
 
     const Int_t NRGBs = 5; const Int_t NCont = 255;
     Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
@@ -49,24 +50,29 @@ void dumpAllWaveformsRoot( const String& inputFile, const String& outputFile )
     TColor::CreateGradientColorTable( NRGBs, stops, red, green, blue, NCont );
     gStyle->SetNumberContours( NCont );
 
-    cvs.Divide( 4, 2 );
+    gStyle->SetNdivisions(505);
 
+    cvs.Divide( 4, 2 );
+    
     for( int ch = 0; ch < 8; ++ch ) {
         cvs.cd( ch+1 );
+        gStyle->SetNdivisions(505);
         gPad->SetRightMargin( 0.2 );
+        gPad->SetLogz(1);
         TH2F* pHist = histArr.at( ch );
         if( pHist == nullptr ) continue;
 
-        pHist->GetXaxis()->SetTitle( "clock [40 MHz]" );
+        pHist->GetXaxis()->SetTitle( "Clock [40 MHz]" );
+        // pHist->GetXaxis()->SetRangeUser( 400.0, 1200.0 );
         pHist->GetYaxis()->SetTitle( "ADC count" );
-        // pHist->GetYaxis()->SetRangeUser( 200.0, 4000.0 );
+        // pHist->GetYaxis()->SetRangeUser( 0.0, 2000.0 );
         pHist->GetZaxis()->SetTitle( "Entries" );
         pHist->Draw( "colz" );
     }
 
     cvs.SaveAs( Form( "%s.png", outputFile.c_str( ) ) );
-    // cvs.SaveAs( Form( "%s.pdf", outputFile.c_str( ) ) );
-    // cvs.SaveAs( Form( "%s.eps", outputFile.c_str( ) ) );
+    cvs.SaveAs( Form( "%s.pdf", outputFile.c_str( ) ) );
+    cvs.SaveAs( Form( "%s.eps", outputFile.c_str( ) ) );
 
     return;
 }

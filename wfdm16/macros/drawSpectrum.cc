@@ -1,6 +1,6 @@
 #include "inc/shinclude.h"
 
-void drawSpectrum( const String& inputFile, const String& outputDir )
+void drawSpectrum( const String& inputFile, const String& outputDir, const bool& isPositive = true )
 {
     SetShStyle( );
     ShUtil::ExistCreateDir( outputDir );
@@ -26,12 +26,12 @@ void drawSpectrum( const String& inputFile, const String& outputDir )
     for( int i = 0; i < 8; ++i ) {
         String histPHName = Form( "hist_PH_%d", i );
         String histCIName = Form( "hist_CI_%d", i );
-        histPHArr.push_back( new TH1F( histPHName.c_str( ), histPHName.c_str( ), 100, -400.0, 1100.0 ) );
-        histCIArr.push_back( new TH1F( histCIName.c_str( ), histCIName.c_str( ), 100, -50000.0, 150000.0 ) );
+        histPHArr.push_back( new TH1F( histPHName.c_str( ), histPHName.c_str( ), 100, -50.0, 2950.0 ) );
+        histCIArr.push_back( new TH1F( histCIName.c_str( ), histCIName.c_str( ), 100, -50000.0, 1500000.0 ) );
     }
 
     TH1F* pHistAllPH = new TH1F( "hist_PH_All", "hist_PH_All", 100, -50.0, 950.0 );
-    TH1F* pHistAllCI = new TH1F( "hist_CI_All", "hist_CI_All", 100, -50000.0, 150000.0 );
+    TH1F* pHistAllCI = new TH1F( "hist_CI_All", "hist_CI_All", 100, -50000.0, 100000.0 );
 
     TFile outFile( Form( "%s/output.root", outputDir.c_str( ) ), "RECREATE" );
     TTree* pOutTree = new TTree( "tree", "tree" );
@@ -57,6 +57,7 @@ void drawSpectrum( const String& inputFile, const String& outputDir )
     pOutTree->Branch( "intCharge7", &intChargeArr[7] );
 
     int totEvt = pTree->GetEntries( );
+    int numSig = 0;
     for( int evt = 0; evt < totEvt; ++evt ) {
         ShUtil::PrintProgressBar( evt, totEvt );
         pTree->GetEntry( evt );
@@ -69,7 +70,7 @@ void drawSpectrum( const String& inputFile, const String& outputDir )
             if( pHistPH == nullptr || pHistCI == nullptr ) continue;
 
             double pedestal = 0.0;
-            for( int clk = 0; clk < 400; ++clk )
+            for( int clk = 0; clk < 400; ++clk ) 
                 pedestal += static_cast< double >( fadcVar[ch][clk] );
 
             pedestal /= 400.0;
@@ -78,16 +79,31 @@ void drawSpectrum( const String& inputFile, const String& outputDir )
             double maxHight = pedestal;
             double intCharge = 0.0;;
             // for( int clk = 400; clk < 2048; ++clk ) {
-            for( int clk = 400; clk < 1000; ++clk ) {
-                if( fadcVar[ch][clk] > maxHight ) maxHight = static_cast< double >( fadcVar[ch][clk] );
-                intCharge += ( static_cast< double >( fadcVar[ch][clk] ) - pedestal );
+            for( int clk = 400; clk < 1500; ++clk ) {
+                if( fadcVar[ch][clk] > 2000 ) fadcVar[ch][clk] -= 4096;
+                
+                if( isPositive == true ) {
+                    if( fadcVar[ch][clk] > maxHight ) maxHight = static_cast< double >( fadcVar[ch][clk] );
+                    intCharge += ( static_cast< double >( fadcVar[ch][clk] ) - pedestal );
+                }
+                else {
+                    if( fadcVar[ch][clk] < maxHight ) maxHight = static_cast< double >( fadcVar[ch][clk] );
+                    intCharge += ( static_cast< double >( pedestal - fadcVar[ch][clk] ) );
+                }
             }
-            pHistPH->Fill( maxHight - pedestal );
-            pHistCI->Fill( intCharge );
+            if( isPositive == true ) {
+                pHistPH->Fill( maxHight - pedestal );
+                allMaxHight += ( maxHight - pedestal );
+                maxHightArr[ch] = maxHight - pedestal;
+            }
+            else {
+                pHistPH->Fill( pedestal - maxHight );
+                allMaxHight += ( pedestal - maxHight );
+                maxHightArr[ch] = pedestal - maxHight;
+            }
 
-            allMaxHight += ( maxHight - pedestal );
+            pHistCI->Fill( intCharge );
             allIntCharge += intCharge;
-            maxHightArr[ch] = maxHight - pedestal;
             intChargeArr[ch] = intCharge;
         }
 
@@ -95,31 +111,43 @@ void drawSpectrum( const String& inputFile, const String& outputDir )
         // DEBUG(allMaxHight);
         pHistAllPH->Fill( allMaxHight  );
         pHistAllCI->Fill( allIntCharge );
+
+        if( allMaxHight > 400 ) ++numSig;
+        // if( allMaxHight > 100 ) DEBUG( evt );
     }
 
     pOutTree->Write( );
+    DEBUG(totEvt);
+    DEBUG(numSig);
 
     TF1 func("gaus","gaus", 0, 200000);
     func.SetNpx(2000);
     func.SetLineWidth(2);
-    TCanvas cvs( "cvs", "cvs", 800, 800 );
+    TCanvas cvs( "cvs", "cvs", 400, 600 );
     cvs.Divide( 1, 2 );
+    cvs.cd( 1 );
+    cvs.SetLogy(1);
+    gPad->SetLogy(1);
+    cvs.cd( 2 );
+    cvs.SetLogy(1);
+    gPad->SetLogy(1);
     for( int ch = 0; ch < 8; ++ch ) {
         cvs.cd( 1 );
         TH1F* pHistPH = histPHArr.at( ch );
         if( pHistPH == nullptr ) continue;
-        pHistPH->GetXaxis()->SetTitle( "ADC count" );
+        pHistPH->GetXaxis()->SetTitle( "Peak ADC count (offset subtract)" );
         pHistPH->GetYaxis()->SetTitle( "Events" );
         pHistPH->Draw( );
-        pHistPH->Fit( &func,"MIQ", "", 30, 300 );
+        pHistPH->Fit( &func,"MIQ", "", 100, 350 );
         // ShTUtil::CreateDrawText(0.2, 0.88, Form("Channel %d", ch));
         // ShTUtil::CreateDrawText(0.2, 0.78, "Peak hight: 500 mV");
         // ShTUtil::CreateDrawText(0.2, 0.7, Form("Mean: %2.1lf #pm %2.1lf", func.GetParameter(1), func.GetParError(1)));
 
         // ShTUtil::CreateDrawText(0.2, 0.5, Form("Cal. factor: %2.2lf mV/ADC", 500.0 / func.GetParameter(1)));
 
-        ShTUtil::CreateDrawText(0.6, 0.88, Form("Channel %d", ch));
-        ShTUtil::CreateDrawText(0.6, 0.8, Form("Mean: %2.1lf #pm %2.1lf", func.GetParameter(1), func.GetParError(1)));
+        // ShTUtil::CreateDrawText(0.6, 0.86, "^{55}Fe spectrum" );
+        ShTUtil::CreateDrawText(0.6, 0.80, Form("Channel %d", ch));
+        ShTUtil::CreateDrawText(0.6, 0.7, Form("Mean: %2.1lf #pm %2.1lf", func.GetParameter(1), func.GetParError(1)));
 
         cvs.cd( 2 );
         TH1F* pHistCI = histCIArr.at( ch );

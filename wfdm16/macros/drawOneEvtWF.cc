@@ -32,9 +32,18 @@ void drawOneEvtWF( const String& input, const int& evtNum, const String& prefix 
     for( int ch = 0; ch < 8; ++ch ) {
         String histName = Form( "hist_%d", ch );
         int clkArr[2048] = {};
+
+        // calc pedestal
+        int pedestal = 0;
+        int baselineRegion = 400;
+        for( int clk = 0; clk < baselineRegion; ++clk ) pedestal += fadcVar[ch][clk];
+        pedestal /= 400;
+
         for( int clk = 0; clk < 2048; ++clk ) {
-            fadcVar[ch][clk] += ch*500;
-            clkArr[clk] = clk;
+            if( fadcVar[ch][clk] > 2000 ) fadcVar[ch][clk] -= 4096;
+            fadcVar[ch][clk] -= pedestal;
+            fadcVar[ch][clk] += (7 - ch)*300;
+            clkArr[clk] = clk * 25;
         }
         TGraph* pGraph = new TGraph( 2048, clkArr, fadcVar[ch]);
         grFADCArr.push_back( pGraph );
@@ -48,21 +57,22 @@ void drawOneEvtWF( const String& input, const int& evtNum, const String& prefix 
     for( auto pGraph : grFADCArr ) {
         if( pGraph == nullptr ) return;
         // if( idx > 3 ) break;
-
-        pGraph->SetMarkerSize( 1 );
+        pGraph->SetMarkerSize( 0.3 );
         pGraph->SetMarkerColor( idx+1 );
         pGraph->SetLineColor( idx+1 );
-        pGraph->SetMarkerStyle( 2 );
+        pGraph->SetMarkerStyle( 9 );
         mg.Add( pGraph );
         ++idx;
     }
 
     mg.Draw("AP");
     mg.GetXaxis()->SetTitle( "clock [40 MHz]" );
+    mg.GetXaxis()->SetTitle( "Time [ns]" );
     mg.GetYaxis()->SetTitle( "ADC count (relative)" );
-    mg.GetYaxis()->SetRangeUser( 0, 4800 );
+    mg.GetYaxis()->SetRangeUser( -1000, 3000 );
     mg.Draw("AP");
     
+        ShTUtil::CreateDrawText( 0.7, 0.85, Form( "Event ID: %d", evtNum ) );
     cvs.SaveAs( Form( "%s_%d.png", prefix.c_str( ), evtNum ) );
     
     return;
