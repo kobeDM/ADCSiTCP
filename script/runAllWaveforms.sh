@@ -17,5 +17,7 @@ mv ${BINARY} ./${OUT_DIR}/
 mv ${OUT_DIR}.root ./${OUT_DIR}/
 
 
-EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot.cc
-root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\",\"${OUT_DIR}/${OUT_DIR}\")"
+#EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot.cc
+#EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot3.cc
+#root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\",\"${OUT_DIR}/${OUT_DIR}\")"
+#root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\",0)"
