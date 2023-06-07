@@ -52,42 +52,35 @@ int main(int argc, char *argv[])
     std::cout << "Decode start." << std::endl;
     while( !ifs.eof( ) ) {
         ifs.read( buf, PACKET_WIDTH );
+        unsigned char ucharbuf[PACKET_WIDTH] = {}; 
+        for(int i = 0; i < PACKET_WIDTH; i++ ) ucharbuf[i] = (unsigned char)buf[i];
 
         // read header
-        if( (int)buf[0] == 0xaa && (int)buf[1] == 0x55 ) {
-            hID      = ((int)buf[0] << 8) + (int)buf[1];
-            hTRG_POS = ((int)buf[2] << 8) + (int)buf[3];
-
-            // std::cout << "HEAD_ID: " << std::hex << std::setw(4) << hID      << std::endl;
-            // std::cout << "TRG_POS: " << std::hex << std::setw(4) << hTRG_POS << std::endl;
+        if( (unsigned int)ucharbuf[0] == 0xaa && (unsigned int)ucharbuf[1] == 0x55 ) {
+            hID      = ((unsigned int)ucharbuf[0] << 8) + (unsigned int)ucharbuf[1];
+            hTRG_POS = ((unsigned int)ucharbuf[2] << 8) + (unsigned int)ucharbuf[3];
 
             ifs.read( buf, PACKET_WIDTH );
-            hSMP_FRG = ((int)buf[0] << 8) + (int)buf[1];
-            hCH_TOP  = (int)buf[2];
-            hCH_STP  = (int)buf[3];
+            for(int i = 0; i < PACKET_WIDTH; i++ ) ucharbuf[i] = (unsigned char)buf[i];
+            hSMP_FRG = ((unsigned int)ucharbuf[0] << 8) + (unsigned int)ucharbuf[1];
+            hCH_TOP  = (unsigned int)ucharbuf[2];
+            hCH_STP  = (unsigned int)ucharbuf[3];
             
-            // std::cout << "SMP_FRG: " << std::dec << hSMP_FRG << std::endl;
-            // std::cout << "CH_TOP : " << std::dec << hCH_TOP  << std::endl;
-            // std::cout << "CH_STP : " << std::dec << hCH_STP  << std::endl;
+            ifs.read( buf, PACKET_WIDTH );
+            for(int i = 0; i < PACKET_WIDTH; i++ ) ucharbuf[i] = (unsigned char)buf[i];
+            hCH_NUM  = (unsigned int)ucharbuf[0];
+            hDT_LEN  = (unsigned int)ucharbuf[1];
+            hREC_LEN = ((unsigned int)ucharbuf[2] << 8) + (unsigned int)ucharbuf[3];
 
             ifs.read( buf, PACKET_WIDTH );
-            hCH_NUM  = (int)buf[0];
-            hDT_LEN  = (int)buf[1];
-            hREC_LEN = ((int)buf[2] << 8) + (int)buf[3];
-            
-            // std::cout << "CH_NUM : " << std::dec << hCH_NUM  << std::endl;
-            // std::cout << "DT_LEN : " << std::dec << hDT_LEN  << std::endl;
-            // std::cout << "REC_LEN: " << std::dec << hREC_LEN << std::endl;
+            for(int i = 0; i < PACKET_WIDTH; i++ ) ucharbuf[i] = (unsigned char)buf[i];
 
-            ifs.read( buf, PACKET_WIDTH );
-            // std::cout << "TRIG_TIM1 : " << std::hex << (int)buf[0] << (int)buf[1] << (int)buf[2] << (int)buf[3]  << std::endl;
-            // std::cout << "TRIG_TIM2 : " << std::hex << (int)buf[0] << (int)buf[1] << (int)buf[2] << (int)buf[3]  << std::endl;
-
-            // std::cout << std::dec;
             for( int ch = 0; ch < hCH_NUM; ++ch ) {
                 ifs.read( adc, (int)(hREC_LEN * sizeof(short)) );
+        	unsigned char ucharadc[MAX_SAMPLING*2] = {}; 
+	 	for(int i = 0; i < MAX_SAMPLING*2 ; i++ ) ucharadc[i] = (unsigned char)adc[i];		
                 for( int clk = 0; clk < hREC_LEN; ++clk ) {
-                    fadcVar[ch][clk] = ((int)adc[2*clk] << 4 ) + ((int)adc[2*clk+1] >> 4 );
+                    fadcVar[ch][clk] = ((unsigned int)ucharadc[2*clk] << 4 ) + ((unsigned int)ucharadc[2*clk+1] >> 4 );
                 }
             }
             pTree->Fill( );
