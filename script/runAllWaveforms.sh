@@ -15,9 +15,14 @@ fi
 mkdir ${OUT_DIR}
 mv ${BINARY} ./${OUT_DIR}/
 mv ${OUT_DIR}.root ./${OUT_DIR}/
+cd ./${OUT_DIR}
+ln -s ../../ADCSiTCP/ShUtil
+source ShUtil/script/setup_shutil.sh
+
 
 
 #EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot.cc
-#EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot3.cc
+EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot4.cc
 #root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\",\"${OUT_DIR}/${OUT_DIR}\")"
-#root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\",0)"
+#root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\")"
+root -q -b -l "${EXE}(\"${OUT_DIR}.root\")"
