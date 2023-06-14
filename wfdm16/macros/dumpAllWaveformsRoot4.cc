@@ -113,7 +113,8 @@ void dumpAllWaveformsRoot4( const String& inputFile)
         pHist->GetXaxis()->SetTitle( "clock [5 MHz]" );
         pHist->GetXaxis()->SetRangeUser( 0.0, 4096.0 );
         pHist->GetYaxis()->SetTitle( "ADC count" );
-        pHist->GetYaxis()->SetRangeUser( -2096, 2000.0 );
+        //pHist->GetYaxis()->SetRangeUser( -2096, 2000.0 );
+        pHist->GetYaxis()->SetRangeUser( -20, 200.0 );
         pHist->GetZaxis()->SetTitle( "Entries" );
         pHist->GetZaxis()->SetRangeUser(0,totEvt/10);
         pHist->Draw( "colz" );
