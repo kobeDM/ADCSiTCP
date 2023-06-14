@@ -174,13 +174,13 @@ void dumpAllWaveformsRoot4( const String& inputFile)
     }
 
     cvsh.SaveAs("wave.root");
-    cvsh.SaveAs("wave.eog");
+    cvsh.SaveAs("wave.png");
     cvsm.SaveAs("max.root");
-    cvsm.SaveAs("max.eog");
+    cvsm.SaveAs("max.png");
     cvsi.SaveAs("int.root");
-    cvsi.SaveAs("int.eog");
+    cvsi.SaveAs("int.png");
     cvsmi.SaveAs("max_int.root");
-    cvsmi.SaveAs("max_int.eog");
+    cvsmi.SaveAs("max_int.png");
     
     return;
 }
