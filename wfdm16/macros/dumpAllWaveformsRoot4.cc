@@ -19,7 +19,7 @@ void dumpAllWaveformsRoot4( const String& inputFile)
         String intName = Form( "int_%d", i );
         String max_intName = Form( "max_int_%d", i );
 
-        histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 2048, 0.0, 2048.0, 4096, -2096.0, 2000.0 ) );
+        histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 4096, 0.0, 4096.0, 4096, -2096.0, 2000.0 ) );
         maxArr.push_back( new TH1F( maxName.c_str( ), maxName.c_str( ), 4096, -2096.0, 2000.0) );
         intArr.push_back( new TH1F( intName.c_str( ), intName.c_str( ), 3000, -20000.0, 40000.0) );
         max_intArr.push_back( new TH2F( max_intName.c_str( ), max_intName.c_str( ), 4096, -2096.0, 2000.0, 3000, -20000.0, 40000.0) );
@@ -29,7 +29,7 @@ void dumpAllWaveformsRoot4( const String& inputFile)
     TTree* pTree = dynamic_cast< TTree* >( file.Get( "tree" ) );
     if( pTree == nullptr ) return;
 
-    int   fadcVar[8][2048] = {};
+    int   fadcVar[8][4096] = {};
     pTree->SetBranchAddress( "fadc0", fadcVar[0] );
     pTree->SetBranchAddress( "fadc1", fadcVar[1] );
     pTree->SetBranchAddress( "fadc2", fadcVar[2] );
@@ -58,7 +58,7 @@ void dumpAllWaveformsRoot4( const String& inputFile)
        	    double max_fadc = 0.;
        	    double sum_fadc = 0.;
 	    int max_clock = 0;
-            for( int clk = 2; clk < 2048; ++clk ) {
+            for( int clk = 2; clk < 4096; ++clk ) {
    	    	if(fadcVar[ch][clk]>2000){
 		     fadcVar[ch][clk]-=4096;
 	    	}
@@ -67,7 +67,7 @@ void dumpAllWaveformsRoot4( const String& inputFile)
 		}
 	    }
        	    base_fadc = base_fadc/198;
-            for( int clk = 2; clk < 2048; ++clk ) {
+            for( int clk = 2; clk < 4096; ++clk ) {
 		sum_fadc += fadcVar[ch][clk] - base_fadc;
                 if(max_fadc<=fadcVar[ch][clk]){
 			max_fadc = fadcVar[ch][clk]; 
@@ -80,7 +80,7 @@ void dumpAllWaveformsRoot4( const String& inputFile)
 	    pre_mean[ch] += sum_fadc;	
 	    pre_max[ch] += max_fadc;	
 	    pre_count[ch]++;
-            for( int clk = 0; clk < 2048; ++clk ) {
+            for( int clk = 0; clk < 4096; ++clk ) {
        	        pHist->Fill( clk, fadcVar[ch][clk] );
 	    }
         }
@@ -111,7 +111,7 @@ void dumpAllWaveformsRoot4( const String& inputFile)
         if( pHist == nullptr ) continue;
 
         pHist->GetXaxis()->SetTitle( "clock [5 MHz]" );
-        pHist->GetXaxis()->SetRangeUser( 0.0, 2056.0 );
+        pHist->GetXaxis()->SetRangeUser( 0.0, 4096.0 );
         pHist->GetYaxis()->SetTitle( "ADC count" );
         pHist->GetYaxis()->SetRangeUser( -2096, 2000.0 );
         pHist->GetZaxis()->SetTitle( "Entries" );
