@@ -9,15 +9,15 @@ void dumpAllWaveformsRoot3( const String& inputFile, int ch_num)
     histArr.reserve( 16 );
     for( int i = 0; i < 16; ++i ) {
         String histName = Form( "hist_%d", i );
-        //histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 2048, 0.0, 2048.0, 4096, 0.0, 4096.0 ) );
-        histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 2048, 0.0, 2048.0, 4096, -2096.0, 2000.0 ) );
+        //histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 4096, 0.0, 4096.0, 4096, 0.0, 4096.0 ) );
+        histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 4096, 0.0, 4096.0, 4096, -2096.0, 2000.0 ) );
     }
 
     TFile file( inputFile.c_str( ) );
     TTree* pTree = dynamic_cast< TTree* >( file.Get( "tree" ) );
     if( pTree == nullptr ) return;
 
-    int   fadcVar[16][2048] = {};
+    int   fadcVar[16][4096] = {};
     pTree->SetBranchAddress( "fadc0", fadcVar[0] );
     pTree->SetBranchAddress( "fadc1", fadcVar[1] );
     pTree->SetBranchAddress( "fadc2", fadcVar[2] );
@@ -26,14 +26,6 @@ void dumpAllWaveformsRoot3( const String& inputFile, int ch_num)
     pTree->SetBranchAddress( "fadc5", fadcVar[5] );
     pTree->SetBranchAddress( "fadc6", fadcVar[6] );
     pTree->SetBranchAddress( "fadc7", fadcVar[7] );
-    pTree->SetBranchAddress( "fadc8", fadcVar[8] );
-    pTree->SetBranchAddress( "fadc9", fadcVar[9] );
-    pTree->SetBranchAddress( "fadc10", fadcVar[10] );
-    pTree->SetBranchAddress( "fadc11", fadcVar[11] );
-    pTree->SetBranchAddress( "fadc12", fadcVar[12] );
-    pTree->SetBranchAddress( "fadc13", fadcVar[13] );
-    pTree->SetBranchAddress( "fadc14", fadcVar[14] );
-    pTree->SetBranchAddress( "fadc15", fadcVar[15] );
 
     //ofuji
     TH1D *h1 = new TH1D("h1","h1",1000,0,4000);
@@ -43,8 +35,8 @@ void dumpAllWaveformsRoot3( const String& inputFile, int ch_num)
     TH1D *h4 = new TH1D("h4","h4",1000,0,4000);
     TH1D *h5 = new TH1D("h5","h5",3000,-100000,200000);
     TH2D *h6 = new TH2D("h6","h6",1000,0,4000,3000,-100000,200000);
-    TH2D *hwave = new TH2D("hwave","hwave",2048,0,2048,4096,-2096,2000);
-    TH2D *hwave_num = new TH2D("hwave_num","hwave_num",2048,0,2048,4096,-2096,2000);
+    TH2D *hwave = new TH2D("hwave","hwave",4096,0,4096,4096,-2096,2000);
+    TH2D *hwave_num = new TH2D("hwave_num","hwave_num",4096,0,4096,4096,-2096,2000);
     TH1D *hint = new TH1D("hint","hint",3000,-100000,200000);
     int pre_mean = 0;
     int pre_count = 0;
@@ -68,7 +60,7 @@ void dumpAllWaveformsRoot3( const String& inputFile, int ch_num)
        	    double sum_fadc = 0.;
        	    double latter_max_fadc = 0.;
 	    int max_clock = 0;
-            for( int clk = 2; clk < 2048; ++clk ) {
+            for( int clk = 2; clk < 4096; ++clk ) {
    	    	if(fadcVar[ch][clk]>2000){
 		     fadcVar[ch][clk]-=4096;
 	    	}
@@ -77,7 +69,7 @@ void dumpAllWaveformsRoot3( const String& inputFile, int ch_num)
 		}
 	    }
        	    base_fadc = base_fadc/198;
-            for( int clk = 2; clk < 2048; ++clk ) {
+            for( int clk = 2; clk < 4096; ++clk ) {
 		sum_fadc += fadcVar[ch][clk] - base_fadc;
                 if(max_fadc<=fadcVar[ch][clk]){
 			max_fadc = fadcVar[ch][clk]; 
@@ -108,7 +100,7 @@ void dumpAllWaveformsRoot3( const String& inputFile, int ch_num)
 			h5->Fill(sum_fadc);
 			h6->Fill(max_fadc,sum_fadc);
 		}
-            	for( int clk = 0; clk < 2048; ++clk ) {
+            	for( int clk = 0; clk < 4096; ++clk ) {
                	 pHist->Fill( clk, fadcVar[ch][clk] );
 		 //if((-15000<=sum_fadc)&&(sum_fadc<=-8000)){//cut
 		 if((-1000<=sum_fadc)&&(sum_fadc<=1000)){//cut
