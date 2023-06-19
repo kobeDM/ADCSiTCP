@@ -21,8 +21,8 @@ void dumpAllWaveformsRoot4( const String& inputFile)
 
         histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 4096, 0.0, 4096.0, 4096, -2096.0, 2000.0 ) );
         maxArr.push_back( new TH1F( maxName.c_str( ), maxName.c_str( ), 4096, -2096.0, 2000.0) );
-        intArr.push_back( new TH1F( intName.c_str( ), intName.c_str( ), 3000, -20000.0, 40000.0) );
-        max_intArr.push_back( new TH2F( max_intName.c_str( ), max_intName.c_str( ), 4096, -2096.0, 2000.0, 3000, -20000.0, 40000.0) );
+        intArr.push_back( new TH1F( intName.c_str( ), intName.c_str( ), 100, -20000.0, 40000.0) );
+        max_intArr.push_back( new TH2F( max_intName.c_str( ), max_intName.c_str( ), 4096, -2096.0, 2000.0, 100, -20000.0, 40000.0) );
     }
 
     TFile file( inputFile.c_str( ) );
@@ -146,7 +146,7 @@ void dumpAllWaveformsRoot4( const String& inputFile)
         pInt->GetXaxis()->SetRangeUser( -20000.0, 40000.0 );
         pInt->GetYaxis()->SetTitle( "entry" );
         pInt->Draw();
-        TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)",0,20000000);
+        TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)",0,200000);
     	f1->SetParameters(1,pre_mean[ch]/pre_count[ch],100);
 	//cout << "ch:" << ch << " pre_mean/pre_count=" << pre_mean[ch]/pre_count[ch] << endl;
         pInt->Fit(f1);
