@@ -8,7 +8,7 @@ const int    MAX_SAMPLING = 4096;
 const String ADCSiTCP_IP  = "192.168.10.16";
 const int    HEADER_SIZE  = 20; // 20 Byte
 const int    ADC_RANGE    = 16; // Actual ADC resolution is 12 bit
-const int    PACKET_SIZE  = ADC_RANGE * MAX_SAMPLING * NUM_CH;
+const int    PACKET_SIZE  = ADC_RANGE * MAX_SAMPLING * NUM_CH / 8 + HEADER_SIZE;
 
 int usage()
 {
@@ -18,7 +18,7 @@ int usage()
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3) {
+    if (argc != 4) {
         usage();
         exit(1);
     }
@@ -26,25 +26,52 @@ int main(int argc, char *argv[])
     String sitcp_ip    = argv[1];
     String outfilename = argv[2];
     int    nEvent      = std::stoi( argv[3] );
-    
+
+    std::cout << "--- ADC SiTCP DAQ START ---" << std::endl;
+    std::cout << std::endl;
+    std::cout << "- Configuration -" <<  std::endl;
+    std::cout << "IP: " << ADCSiTCP_IP << std::endl;
+    std::cout << "#Channels: " << NUM_CH << std::endl;
+    std::cout << "SAMPLING: " << MAX_SAMPLING << std::endl;
+    std::cout << "#Events: " << nEvent << std::endl;
+    std::cout << "Output filename: " << outfilename << std::endl;
+
+    std::cout << std::endl;
+
+    std::cout << "- Trying to establish TCP connection... -" << std::endl;
     SiTCP SiTCP;
     if( SiTCP.Open( sitcp_ip ) != 0 ) {
         ShUtil::Cerr( "Failed to connect to ADCSiTCP..." );
         exit(0);
     }
 
+    std::cout << "Connection established to " << ADCSiTCP_IP << std::endl;
+
     std::ofstream ofs;
     ofs.open( outfilename, std::ios::out );
     
+    std::cout << std::endl;
+    std::cout << "DATA STORE..." << std::endl;
+    std::cout << std::endl;
+
     int  evtIdx     = 0;
     char* pData = new char[ PACKET_SIZE ];
+    int getByteSize = 0, totalByteSize = 0;
+    String evtText = "";
+    std::cout << "Events: " << evtIdx << " / " << nEvent << std::endl;
     while( 1 ) {
-        int num = SiTCP.Read( pData, PACKET_SIZE );
-        if( num > 0 ) {
-            ofs.write( pData, num );
-            ++evtIdx;
+        getByteSize = SiTCP.Read( pData, PACKET_SIZE );
+        if( getByteSize > 0 ) {
+            ofs.write( pData, getByteSize );
+            totalByteSize += getByteSize;
+
+            if( totalByteSize >= PACKET_SIZE ) {
+                ++evtIdx;
+                totalByteSize = 0;
+                if( evtIdx % 10 == 0 )
+                    std::cout << "Events: " << evtIdx << " / " << nEvent << std::endl;
+            }
         }
-        std::cout << "Event: " << evtIdx << "/" << nEvent << std::endl;
 
         if( evtIdx >= nEvent ) break;
     }
