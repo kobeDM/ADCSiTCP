@@ -22,7 +22,7 @@ source ShUtil/script/setup_shutil.sh
 
 
 #EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot.cc
-EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot4.cc
+#EXE=${ADC_SITCP_WFDM_MAC}/dumpAllWaveformsRoot4.cc
 #root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\",\"${OUT_DIR}/${OUT_DIR}\")"
 #root -q -b -l "${EXE}(\"${OUT_DIR}/${OUT_DIR}.root\")"
-root -q -b -l "${EXE}(\"${OUT_DIR}.root\")"
+#root -q -b -l "${EXE}(\"${OUT_DIR}.root\")"
