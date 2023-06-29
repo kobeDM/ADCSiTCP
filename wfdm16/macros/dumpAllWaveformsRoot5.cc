@@ -153,7 +153,8 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         if( pHist == nullptr ) continue;
 
         pHist->GetXaxis()->SetTitle( "clock [5 MHz]" );
-        pHist->GetXaxis()->SetRangeUser( 0.0, 4096.0 );
+        //pHist->GetXaxis()->SetRangeUser( 0.0, 4096.0 );
+        pHist->GetXaxis()->SetRangeUser( 1400.0, 1800.0 );
         pHist->GetYaxis()->SetTitle( "ADC count" );
         //pHist->GetYaxis()->SetRangeUser( -2096, 2000.0 );
         pHist->GetYaxis()->SetRangeUser( -20, 200.0 );
@@ -172,7 +173,7 @@ void dumpAllWaveformsRoot5( const String& inputFile)
 
         pHistcut->GetXaxis()->SetTitle( "clock [5 MHz]" );
         //pHistcut->GetXaxis()->SetRangeUser( 0.0, 4096.0 );
-        pHistcut->GetXaxis()->SetRangeUser( 1200.0, 1800.0 );
+        pHistcut->GetXaxis()->SetRangeUser( 1400.0, 1800.0 );
         pHistcut->GetYaxis()->SetTitle( "ADC count" );
         pHistcut->GetYaxis()->SetRangeUser( -20, 60.0 );
         pHistcut->GetZaxis()->SetTitle( "Entries" );
@@ -238,12 +239,12 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         pIntcut->GetXaxis()->SetRangeUser( -20000.0, 40000.0 );
         pIntcut->GetYaxis()->SetTitle( "entry" );
         pIntcut->Draw();
-        TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)",0,200000);
-    	f1->SetParameters(1,pre_mean_cut[ch]/pre_count_cut[ch],100);
-        f1->SetLineColor(kRed);
-        pIntcut->Fit(f1);
-    	double_t mean_cut = f1->GetParameter(1);
-    	double_t hight_cut = f1->GetParameter(0);
+        TF1 *f1_c = new TF1("f1_c","[0]*exp(-0.5*((x-[1])/[2])^2)",0,200000);
+    	f1_c->SetParameters(1,pre_mean_cut[ch]/pre_count_cut[ch],100);
+        f1_c->SetLineColor(kRed);
+        pIntcut->Fit(f1_c);
+    	double_t mean_cut = f1_c->GetParameter(1);
+    	double_t hight_cut = f1_c->GetParameter(0);
     	cout << "ch:" << ch << "\tmean_cut:" << mean_cut <<endl;
         pIntcut->GetYaxis()->SetRangeUser( 0, hight_cut*2 );
     }
