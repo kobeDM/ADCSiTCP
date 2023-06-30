@@ -20,7 +20,7 @@ void dumpAllWaveformsRoot5( const String& inputFile)
     maxArrcut.reserve( 8 );
     intArrcut.reserve( 8 );
     max_intArrcut.reserve( 8 );
-    
+
     for( int i = 0; i < 8; ++i ) {
         String histName = Form( "hist_%d", i );
         String maxName = Form( "max_%d", i );
@@ -66,7 +66,7 @@ void dumpAllWaveformsRoot5( const String& inputFile)
     for( int evt = 0; evt < totEvt; ++evt ) {
         ShUtil::PrintProgressBar( evt, totEvt );
         pTree->GetEntry( evt );
-        
+
         for( int ch = 0; ch < 8; ++ch ) {
             TH2F* pHist = histArr.at( ch );
             TH1F* pMax = maxArr.at( ch );
@@ -77,46 +77,66 @@ void dumpAllWaveformsRoot5( const String& inputFile)
             TH1F* pInt_cut = intArrcut.at( ch );
             TH2F* pMax_Int_cut = max_intArrcut.at( ch );
             if( pHist == nullptr ) continue;
-       	    double base_fadc = 0.;
-       	    double max_fadc = 0.;
-       	    double sum_fadc = 0.;
-	    int max_clock = 0;
+            double base_fadc = 0.;
+            double max_fadc = 0.;
+            double sum_fadc = 0.;
+            int max_clock = 0;
+            bool fadc_over30flag = false;
+            bool fadc_under10flag = false;
             for( int clk = 2; clk < 4096; ++clk ) {
-   	    	if(fadcVar[ch][clk]>2000){
-		     fadcVar[ch][clk]-=4096;
-	    	}
-		if(clk < 200){
-			base_fadc += fadcVar[ch][clk];
-		}
-	    }
-       	    base_fadc = base_fadc/198;
-            for( int clk = 2; clk < 4096; ++clk ) {
-		sum_fadc += fadcVar[ch][clk] - base_fadc;
-        if(max_fadc<=fadcVar[ch][clk]){
-			max_fadc = fadcVar[ch][clk]; 
-			max_clock = clk;
-		}
-            }
-	    pMax->Fill(max_fadc);
-	    pInt->Fill(sum_fadc);
-	    pMax_Int->Fill(max_fadc,sum_fadc);
-        if(max_fadc-base_fadc<50){
-	        pMax_cut->Fill(max_fadc);
-	        pInt_cut->Fill(sum_fadc);
-	        pMax_Int_cut->Fill(max_fadc,sum_fadc);
-	        pre_mean_cut[ch] += sum_fadc;	
-	        pre_max_cut[ch] += max_fadc;	
-	        pre_count_cut[ch]++;
-        }
-	    pre_mean[ch] += sum_fadc;	
-	    pre_max[ch] += max_fadc;	
-	    pre_count[ch]++;
-            for( int clk = 0; clk < 4096; ++clk ) {
-       	        pHist->Fill( clk, fadcVar[ch][clk] );
-                if(max_fadc-base_fadc<50){
-       	            pHistcut->Fill( clk, fadcVar[ch][clk] );
+                if(fadcVar[ch][clk]>2000){
+                    fadcVar[ch][clk]-=4096;
                 }
-	        }
+                if(clk < 200){
+                    base_fadc += fadcVar[ch][clk];
+                }
+            }
+            base_fadc = base_fadc/198;
+            for( int clk = 2; clk < 4096; ++clk ) {
+                sum_fadc += fadcVar[ch][clk] - base_fadc;
+                fadcVar[ch][clk]-=base_fadc;
+                if(max_fadc<=fadcVar[ch][clk]){
+                    max_fadc = fadcVar[ch][clk]; 
+                    max_clock = clk;
+                }
+                if((clk<1450||1620<clk)&&fadcVar[ch][clk]>=30){
+                    fadc_over30flag = true;
+                }
+                if((1500<=clk&&clk<=1550)&&fadcVar[ch][clk]<10){
+                    fadc_under10flag = true;
+                }
+            }
+            pMax->Fill(max_fadc);
+            pInt->Fill(sum_fadc);
+            pMax_Int->Fill(max_fadc,sum_fadc);
+            pre_mean[ch] += sum_fadc;	
+            pre_max[ch] += max_fadc;	
+            pre_count[ch]++;
+            for( int clk = 2; clk < 4096; ++clk ) {
+                pHist->Fill( clk, fadcVar[ch][clk] );
+            }
+
+            //==============
+            //cut hist start
+            //==============
+            
+            //if(max_fadc>20&&(1450<=max_clock&&max_clock<=1620)&&fadc_over30flag==false){
+            //if(max_fadc>20&&(1500<=max_clock&&max_clock<=1600)&&fadc_over30flag==false){
+            if(max_fadc>20&&(1500<=max_clock&&max_clock<=1600)&&fadc_over30flag==false&&fadc_under10flag==false){
+                pMax_cut->Fill(max_fadc);
+                pInt_cut->Fill(sum_fadc);
+                pMax_Int_cut->Fill(max_fadc,sum_fadc);
+                pre_mean_cut[ch] += sum_fadc;	
+                pre_max_cut[ch] += max_fadc;	
+                pre_count_cut[ch]++;
+                for( int clk = 2; clk < 4096; ++clk ) {
+                    pHistcut->Fill( clk, fadcVar[ch][clk] );
+                }
+            }
+            
+            //=============
+            //cut hist end
+            //=============
         }
     }
 
@@ -128,6 +148,9 @@ void dumpAllWaveformsRoot5( const String& inputFile)
     TCanvas cvsm_c( "cvsm_c", "cvsm_c", 1200, 600 );
     TCanvas cvsi_c( "cvsi_c", "cvsi_c", 1200, 600 );
     TCanvas cvsmi_c( "cvsmi_c", "cvsmi_c", 1200, 600 );
+    
+    //same draw
+    TCanvas cvsi_same( "cvsi_same", "cvsi_same", 1200, 600 );
 
     const Int_t NRGBs = 5; const Int_t NCont = 255;
     Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
@@ -146,6 +169,9 @@ void dumpAllWaveformsRoot5( const String& inputFile)
     cvsi_c.Divide( 4, 2 );
     cvsmi_c.Divide( 4, 2 );
 
+    //same draw
+    cvsi_same.Divide( 4, 2 );
+
     for( int ch = 0; ch < 8; ++ch ) {
         cvsh.cd( ch+1 );
         gPad->SetRightMargin( 0.2 );
@@ -153,10 +179,8 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         if( pHist == nullptr ) continue;
 
         pHist->GetXaxis()->SetTitle( "clock [5 MHz]" );
-        //pHist->GetXaxis()->SetRangeUser( 0.0, 4096.0 );
-        pHist->GetXaxis()->SetRangeUser( 1400.0, 1800.0 );
+        pHist->GetXaxis()->SetRangeUser( 1400.0, 1700.0 );
         pHist->GetYaxis()->SetTitle( "ADC count" );
-        //pHist->GetYaxis()->SetRangeUser( -2096, 2000.0 );
         pHist->GetYaxis()->SetRangeUser( -20, 200.0 );
         pHist->GetZaxis()->SetTitle( "Entries" );
         pHist->GetZaxis()->SetRangeUser(0,totEvt/10);
@@ -172,10 +196,9 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         if( pHistcut == nullptr ) continue;
 
         pHistcut->GetXaxis()->SetTitle( "clock [5 MHz]" );
-        //pHistcut->GetXaxis()->SetRangeUser( 0.0, 4096.0 );
-        pHistcut->GetXaxis()->SetRangeUser( 1400.0, 1800.0 );
+        pHistcut->GetXaxis()->SetRangeUser( 1400.0, 1700.0 );
         pHistcut->GetYaxis()->SetTitle( "ADC count" );
-        pHistcut->GetYaxis()->SetRangeUser( -20, 60.0 );
+        pHistcut->GetYaxis()->SetRangeUser( -20, 200.0 );
         pHistcut->GetZaxis()->SetTitle( "Entries" );
         pHistcut->GetZaxis()->SetRangeUser(0,totEvt/10);
         pHistcut->Draw( "colz" );
@@ -203,6 +226,7 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         if( pMaxcut == nullptr ) continue;
 
         pMaxcut->GetXaxis()->SetTitle( "ADC count" );
+        //pMaxcut->GetXaxis()->SetRangeUser( pre_max_cut[ch]/pre_count_cut[ch] - 50.0, pre_max_cut[ch]/pre_count_cut[ch] + 50.0 );
         pMaxcut->GetXaxis()->SetRangeUser( pre_max[ch]/pre_count[ch] - 50.0, pre_max[ch]/pre_count[ch] + 50.0 );
         pMaxcut->GetYaxis()->SetTitle( "entry" );
         pMaxcut->GetYaxis()->SetRangeUser( 0, totEvt );
@@ -219,13 +243,13 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         pInt->GetXaxis()->SetRangeUser( -20000.0, 40000.0 );
         pInt->GetYaxis()->SetTitle( "entry" );
         pInt->Draw();
-        TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)",0,200000);
-    	f1->SetParameters(1,pre_mean[ch]/pre_count[ch],100);
+        TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)",-10000,20000);
+        f1->SetParameters(1,pre_mean[ch]/pre_count[ch],100);
         f1->SetLineColor(kRed);
         pInt->Fit(f1);
-    	double_t mean = f1->GetParameter(1);
-    	double_t hight = f1->GetParameter(0);
-    	cout << "ch:" << ch << "\tmean:" << mean <<endl;
+        double_t mean = f1->GetParameter(1);
+        double_t hight = f1->GetParameter(0);
+        cout << "ch:" << ch << "\tmean:" << mean <<endl;
         pInt->GetYaxis()->SetRangeUser( 0, hight*2 );
     }
 
@@ -239,13 +263,14 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         pIntcut->GetXaxis()->SetRangeUser( -20000.0, 40000.0 );
         pIntcut->GetYaxis()->SetTitle( "entry" );
         pIntcut->Draw();
-        TF1 *f1_c = new TF1("f1_c","[0]*exp(-0.5*((x-[1])/[2])^2)",0,200000);
-    	f1_c->SetParameters(1,pre_mean_cut[ch]/pre_count_cut[ch],100);
+        TF1 *f1_c = new TF1("f1_c","[0]*exp(-0.5*((x-[1])/[2])^2)",-10000,20000);
+        //f1_c->SetParameters(1,pre_mean_cut[ch]/pre_count_cut[ch],100);
+        f1_c->SetParameters(1,pre_mean[ch]/pre_count[ch],100);
         f1_c->SetLineColor(kRed);
         pIntcut->Fit(f1_c);
-    	double_t mean_cut = f1_c->GetParameter(1);
-    	double_t hight_cut = f1_c->GetParameter(0);
-    	cout << "ch:" << ch << "\tmean_cut:" << mean_cut <<endl;
+        double_t mean_cut = f1_c->GetParameter(1);
+        double_t hight_cut = f1_c->GetParameter(0);
+        cout << "ch:" << ch << "\tmean_cut:" << mean_cut <<endl;
         pIntcut->GetYaxis()->SetRangeUser( 0, hight_cut*2 );
     }
 
@@ -266,7 +291,6 @@ void dumpAllWaveformsRoot5( const String& inputFile)
 
         ShTUtil::CreateDrawText( 0.55, 0.85, Form( "channel %d", ch ) );
     }
-
     for( int ch = 0; ch < 8; ++ch ) {
         cvsmi_c.cd( ch+1 );
         gPad->SetRightMargin( 0.2 );
@@ -274,15 +298,42 @@ void dumpAllWaveformsRoot5( const String& inputFile)
         if( pMax_Intcut == nullptr ) continue;
 
         pMax_Intcut->GetXaxis()->SetTitle( "ADC count" );
+        //pMax_Intcut->GetXaxis()->SetRangeUser( pre_max_cut[ch]/pre_count_cut[ch] - 50.0, pre_max_cut[ch]/pre_count_cut[ch] + 50.0 );
         pMax_Intcut->GetXaxis()->SetRangeUser( pre_max[ch]/pre_count[ch] - 50.0, pre_max[ch]/pre_count[ch] + 50.0 );
         pMax_Intcut->GetYaxis()->SetTitle( "ADC sum" );
         pMax_Intcut->GetYaxis()->SetRangeUser( -20000.0, 40000.0 );
-        pMax_Intcut->GetYaxis()->SetRangeUser( pre_mean_cut[ch]/pre_count_cut[ch] - 15000.0, pre_max_cut[ch]/pre_count_cut[ch] + 15000.0 );
+        //pMax_Intcut->GetYaxis()->SetRangeUser( pre_mean_cut[ch]/pre_count_cut[ch] - 15000.0, pre_max_cut[ch]/pre_count_cut[ch] + 15000.0 );
+        pMax_Intcut->GetYaxis()->SetRangeUser( pre_mean[ch]/pre_count[ch] - 15000.0, pre_max[ch]/pre_count[ch] + 15000.0 );
         pMax_Intcut->GetZaxis()->SetTitle( "Entries" );
         pMax_Intcut->GetZaxis()->SetRangeUser(0,totEvt/10);
         pMax_Intcut->Draw( "colz" );
 
         ShTUtil::CreateDrawText( 0.55, 0.85, Form( "channel %d", ch ) );
+    }
+   
+    //-----------
+    //draw same
+    //-----------
+    for( int ch = 0; ch < 8; ++ch ) {
+        cvsi_same.cd( ch+1 );
+        gPad->SetRightMargin( 0.2 );
+        TH1F* pInt = intArr.at( ch );
+        TH1F* pInt_c = intArrcut.at( ch );
+        TH1F* pInt_BG = new TH1F("pInt_BG","pInt_BG",300,-20000.0,40000.0);
+        if( pInt == nullptr ) continue;
+        if( pInt_c == nullptr ) continue;
+        pInt_BG->Add(pInt,1);
+        pInt_BG->Add(pInt_c,-1);
+
+        pInt->GetXaxis()->SetTitle( "ADC sum" );
+        pInt->GetXaxis()->SetRangeUser( -20000.0, 40000.0 );
+        pInt->GetYaxis()->SetTitle( "entry" );
+        pInt->SetLineColor(kRed);
+        pInt_c->SetLineColor(kBlue);
+        pInt_BG->SetLineColor(kGreen);
+        pInt->Draw();
+        pInt_c->Draw("same");
+        pInt_BG->Draw("same");
     }
 
     cvsh.SaveAs("wave.root");
@@ -301,6 +352,9 @@ void dumpAllWaveformsRoot5( const String& inputFile)
     cvsi_c.SaveAs("int_c.png");
     cvsmi_c.SaveAs("max_int_c.root");
     cvsmi_c.SaveAs("max_int_c.png");
-    
+
+    cvsi_same.SaveAs("int_same.root");
+    cvsi_same.SaveAs("int_same.png");
+
     return;
 }
