@@ -49,10 +49,14 @@ int main(int argc, char *argv[])
 
     std::ofstream ofs;
     ofs.open( outfilename, std::ios::out );
+
+    std::time_t starttime = std::time( nullptr );
     
     std::cout << std::endl;
-    std::cout << "DATA STORE..." << std::endl;
+    std::cout << "DAQ START: " << starttime << "\t" << std::ctime( &starttime ) << std::endl;
+
     std::cout << std::endl;
+    std::cout << "Event store: " << nEvent << " events." << std::endl;
 
     int  evtIdx     = 0;
     char* pData = new char[ PACKET_SIZE ];
@@ -75,6 +79,13 @@ int main(int argc, char *argv[])
 
         if( evtIdx >= nEvent ) break;
     }
+
+    std::time_t endtime = std::time( nullptr );
+    std::cout << std::endl;
+    std::cout << "DAQ END: " << endtime << "\t" << std::ctime( &endtime ) << std::endl;
+    std::cout << "Total: " << (double)nEvent / (double)( endtime - starttime ) << " Hz" << std::endl;
+
+    
     ofs.close( );
     
     return 0;
