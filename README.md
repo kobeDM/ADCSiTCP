@@ -1,6 +1,6 @@
 # ADCSiTCP
 
-## SETUP (assuming you are in na12)
+## SETUP (assuming you are in na8)
 
 - Go to DATA directory. 
 ```
@@ -16,7 +16,7 @@ $ cd /home/msgc/work/cn_tc/data // if you want to take data with C/N-TC
 ```
 $ ln -s /home/msgc/sw/repo/ADCSiTCP ./
 $ cd ADCSiTCP
-$ source setup.sh
+$ source ./setup.sh
 $ cd ../
 ```
 
@@ -32,8 +32,5 @@ $ cd YYYYMMDD
 ## START DAQ
 
 ```
-$ runAllWaveforms.sh [BINARY FILE NAME] [OUTPUT DIRECTORY] [DAQ TIME]
-
-e.g. ...
-$ runAllWaveforms.sh data runPer1 100 ## DAQ will run for 100s 
+$ runDAQ.py -r [RUN TYPE e.g. DM, 252Cf, 241Am, ... (default: work)] -n [#events per file (default: 1000)] 
 ```
