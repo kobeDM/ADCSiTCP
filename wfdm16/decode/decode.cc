@@ -12,10 +12,6 @@ int usage()
 
 int main(int argc, char *argv[])
 {
-    std::vector< std::ofstream* > outfileArr;
-    outfileArr.reserve( NUM_CH );
-    char filename[1024];
-
     if (argc != 3) {
         usage();
         exit(1);
