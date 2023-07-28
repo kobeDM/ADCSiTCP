@@ -239,7 +239,10 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
         pMax->GetXaxis()->SetTitle( "ADC count" );
         pMax->GetXaxis()->SetRangeUser( pre_max[ch]/pre_count[ch] - 50.0, pre_max[ch]/pre_count[ch] + 50.0 );
         pMax->GetYaxis()->SetTitle( "entry" );
-        pMax->GetYaxis()->SetRangeUser( 0, totEvt );
+        //pMax->GetYaxis()->SetRangeUser( 0, totEvt );
+	int y_max;
+        y_max = gPad->GetUymax();
+        pMax->GetYaxis()->SetRangeUser( 1, y_max );
         pMax->Draw();
     }
 
