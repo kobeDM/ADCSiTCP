@@ -18,7 +18,10 @@ def parser():
 
 def main( ):
 
+    print("### read config ###")
+
     print("### run ADCSiTCP DAQ ###")
+    
 
     args = parser()
     if( args.nevent != None ):
