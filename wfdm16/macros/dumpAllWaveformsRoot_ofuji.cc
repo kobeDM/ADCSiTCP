@@ -36,7 +36,7 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
 
         histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 4096, 0.0, 4096.0, 4096, -2096.0, 2000.0 ) );
         maxArr.push_back( new TH1F( maxName.c_str( ), maxName.c_str( ), 4096, -2096.0, 2000.0) );
-        minArr.push_back( new TH1F( maxName.c_str( ), maxName.c_str( ), 4096, -2096.0, 2000.0) );
+        minArr.push_back( new TH1F( minName.c_str( ), minName.c_str( ), 4096, -2096.0, 2000.0) );
         intArr.push_back( new TH1F( intName.c_str( ), intName.c_str( ), 300, -20000.0, 40000.0) );
         max_intArr.push_back( new TH2F( max_intName.c_str( ), max_intName.c_str( ), 4096, -2096.0, 2000.0, 300, -20000.0, 40000.0) );
         histArrcut.push_back( new TH2F( histNamecut.c_str( ), histNamecut.c_str( ), 4096, 0.0, 4096.0, 4096, -2096.0, 2000.0 ) );
