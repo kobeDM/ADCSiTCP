@@ -1,6 +1,6 @@
 #include "inc/shinclude.h"
 
-void dumpAllWaveformsRoot_ofuji( const String& inputFile)
+void dumpAllWaveformsRoot_ofuji( const String& inputFile,const String& outputFile)
 {
     SetShStyle( );
 
@@ -44,6 +44,7 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
         intArrcut.push_back( new TH1F( intNamecut.c_str( ), intNamecut.c_str( ), 300, -20000.0, 40000.0) );
         max_intArrcut.push_back( new TH2F( max_intNamecut.c_str( ), max_intNamecut.c_str( ), 4096, -2096.0, 2000.0, 300, -20000.0, 40000.0) );
     }
+
 
     TFile file( inputFile.c_str( ) );
     TTree* pTree = dynamic_cast< TTree* >( file.Get( "tree" ) );
@@ -167,6 +168,7 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
     TCanvas cvsm_c( "cvsm_c", "cvsm_c", 1200, 600 );
     TCanvas cvsi_c( "cvsi_c", "cvsi_c", 1200, 600 );
     TCanvas cvsmi_c( "cvsmi_c", "cvsmi_c", 1200, 600 );
+    TCanvas cvsmax_min( "cvsmax_min", "cvsmax_min", 1200, 600 );
     
     //same draw
     TCanvas cvsi_same( "cvsi_same", "cvsi_same", 1200, 600 );
@@ -188,11 +190,26 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
     cvsm_c.Divide( 4, 2 );
     cvsi_c.Divide( 4, 2 );
     cvsmi_c.Divide( 4, 2 );
+    cvsmax_min.Divide( 4, 2 );
 
     //same draw
     cvsi_same.Divide( 4, 2 );
 
+    //-------------------
+    //  output txt file
+    //-------------------
+    string file_name = outputFile + ".txt";
+    ofstream fout;
+    fout.open(file_name);
+    if(fout.fail()){
+        cout << "*cant open output txt file*" <<endl;
+    }
+
     for( int ch = 0; ch < 8; ++ch ) {
+
+        //===================
+        //  wave form hist
+        //===================
         cvsh.cd( ch+1 );
         gPad->SetRightMargin( 0.2 );
         TH2F* pHist = histArr.at( ch );
@@ -214,6 +231,9 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
     }
 
     for( int ch = 0; ch < 8; ++ch ) {
+        //====================
+        //  wave form hist_c
+        //====================
         cvsh_c.cd( ch+1 );
         gPad->SetRightMargin( 0.2 );
         TH2F* pHistcut = histArrcut.at( ch );
@@ -231,33 +251,101 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
     }
 
     for( int ch = 0; ch < 8; ++ch ) {
+        //===================
+        //  max hist
+        //===================
         cvsm.cd( ch+1 );
         gPad->SetRightMargin( 0.2 );
+        gPad->SetLogy();
+        gPad->SetGridy();
         TH1F* pMax = maxArr.at( ch );
         if( pMax == nullptr ) continue;
 
         pMax->GetXaxis()->SetTitle( "ADC count" );
-        pMax->GetXaxis()->SetRangeUser( pre_max[ch]/pre_count[ch] - 50.0, pre_max[ch]/pre_count[ch] + 50.0 );
+        pMax->GetXaxis()->SetRangeUser( 0, 100 );
         pMax->GetYaxis()->SetTitle( "entry" );
-        //pMax->GetYaxis()->SetRangeUser( 0, totEvt );
-	int y_max;
-        y_max = gPad->GetUymax();
-        //pMax->GetYaxis()->SetRangeUser( 1, y_max );
-        pMax->GetYaxis()->SetRangeUser( 1, 1000 );
         pMax->Draw();
+        ShTUtil::CreateDrawText( 0.55, 0.85, Form( "channel %d", ch ) );
+
+        int start = pMax->FindBin(0);
+        int end = pMax->FindBin(25);
+        int max_bin = 0;
+        int max_ent = 0; 
+        int ent = 0;
+        for(int i=start;i<end;i++){
+            ent = pMax->GetBinContent(i);
+            if(max_ent<=ent){
+                max_bin = i;
+                max_ent = ent;
+            }
+        }
+        pMax->GetYaxis()->SetRangeUser( 1, max_ent*2 );
+        if(ch<=3){
+            cvsmax_min.cd(ch+1);
+            gPad->SetLogy();
+            gPad->SetGridy();
+            pMax->Draw();
+            TF1 *f1 = new TF1("f1","gaus");
+            f1->SetLineColor(kBlue);
+            if(ch==0){
+                pMax->Fit(f1,"","",40*0.625,80*0.625);
+            }else{
+                pMax->Fit(f1,"","",40,80);
+            }
+            double mean = f1->GetParameter(1);
+            double mean_error = f1->GetParError(1);
+            double sigma = f1->GetParameter(2);
+            double sigma_error = f1->GetParError(2);
+            fout << mean << "\t" << mean_error << "\t" << sigma << "\t" << sigma_error << "\t" << abs(sigma/mean) <<endl;
+        }
+
     }
 
     for( int ch = 0; ch < 8; ++ch ) {
+        //===================
+        //  min hist
+        //===================
         cvsmin.cd( ch+1 );
         gPad->SetRightMargin( 0.2 );
+        gPad->SetLogy();
+        gPad->SetGridy();
         TH1F* pMin = minArr.at( ch );
         if( pMin == nullptr ) continue;
 
         pMin->GetXaxis()->SetTitle( "ADC count" );
-        pMin->GetXaxis()->SetRangeUser( pre_min[ch]/pre_count[ch] - 50.0, pre_min[ch]/pre_count[ch] + 50.0 );
+        pMin->GetXaxis()->SetRangeUser( -100, 0 );
         pMin->GetYaxis()->SetTitle( "entry" );
-        pMin->GetYaxis()->SetRangeUser( 0, totEvt );
         pMin->Draw();
+        ShTUtil::CreateDrawText( 0.55, 0.85, Form( "channel %d", ch ) );
+
+        int start = pMin->FindBin(-25);
+        int end = pMin->FindBin(25);
+        int max_bin = 0;
+        int max_ent = 0; 
+        int ent = 0;
+        for(int i=start;i<end;i++){
+            ent = pMin->GetBinContent(i);
+            if(max_ent<=ent){
+                max_bin = i;
+                max_ent = ent;
+            }
+        }
+        pMin->GetYaxis()->SetRangeUser( 1, max_ent*2 );
+        if(ch>=4){
+            cvsmax_min.cd(ch+1);
+            gPad->SetLogy();
+            gPad->SetGridy();
+            pMin->Draw();
+            TF1 *f1 = new TF1("f1","gaus");
+            f1->SetLineColor(kRed);
+            pMin->Fit(f1,"","",-80,-40);
+            double mean = f1->GetParameter(1);
+            double mean_error = f1->GetParError(1);
+            double sigma = f1->GetParameter(2);
+            double sigma_error = f1->GetParError(2);
+            fout << mean << "\t" << mean_error << "\t" << sigma << "\t" << sigma_error << "\t" << abs(sigma/mean) <<endl;
+        }
+
     }
 
     for( int ch = 0; ch < 8; ++ch ) {
@@ -398,6 +486,11 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
 
     cvsi_same.SaveAs("int_same.root");
     cvsi_same.SaveAs("int_same.png");
+
+    cvsmax_min.SaveAs("max_min.root");
+    cvsmax_min.SaveAs("max_min.png");
+
+    fout.close();
 
     return;
 }
