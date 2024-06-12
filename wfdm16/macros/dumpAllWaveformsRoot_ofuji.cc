@@ -360,7 +360,7 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
         gPad->SetRightMargin( 0.2 );
         TH1F* pInt = intArr.at( ch );
         TH1F* pInt_c = intArrcut.at( ch );
-        TH1F* pInt_BG = new TH1F("pInt_BG","pInt_BG",300,-20000.0,40000.0);
+        TH1F* pInt_BG = new TH1F(Form("pInt_BG_%d", ch),Form("pInt_BG_%d", ch),300,-20000.0,40000.0);
         if( pInt == nullptr ) continue;
         if( pInt_c == nullptr ) continue;
         pInt_BG->Add(pInt,1);
@@ -377,26 +377,26 @@ void dumpAllWaveformsRoot_ofuji( const String& inputFile)
         pInt_BG->Draw("same");
     }
 
-    cvsh.SaveAs("wave.root");
+    // cvsh.SaveAs("wave.root");
     cvsh.SaveAs("wave.png");
-    cvsm.SaveAs("max.root");
+    // cvsm.SaveAs("max.root");
     cvsm.SaveAs("max.png");
-    cvsmin.SaveAs("min.root");
+    // cvsmin.SaveAs("min.root");
     cvsmin.SaveAs("min.png");
-    cvsi.SaveAs("int.root");
+    // cvsi.SaveAs("int.root");
     cvsi.SaveAs("int.png");
-    cvsmi.SaveAs("max_int.root");
+    // cvsmi.SaveAs("max_int.root");
     cvsmi.SaveAs("max_int.png");
-    cvsh_c.SaveAs("wave_c.root");
+    // cvsh_c.SaveAs("wave_c.root");
     cvsh_c.SaveAs("wave_c.png");
-    cvsm_c.SaveAs("max_c.root");
+    // cvsm_c.SaveAs("max_c.root");
     cvsm_c.SaveAs("max_c.png");
-    cvsi_c.SaveAs("int_c.root");
+    // cvsi_c.SaveAs("int_c.root");
     cvsi_c.SaveAs("int_c.png");
-    cvsmi_c.SaveAs("max_int_c.root");
+    // cvsmi_c.SaveAs("max_int_c.root");
     cvsmi_c.SaveAs("max_int_c.png");
 
-    cvsi_same.SaveAs("int_same.root");
+    // cvsi_same.SaveAs("int_same.root");
     cvsi_same.SaveAs("int_same.png");
 
     return;

@@ -21,8 +21,8 @@ void dumpAllWaveformsRoot4( const String& inputFile)
 
         histArr.push_back( new TH2F( histName.c_str( ), histName.c_str( ), 4096, 0.0, 4096.0, 4096, -2096.0, 2000.0 ) );
         maxArr.push_back( new TH1F( maxName.c_str( ), maxName.c_str( ), 4096, -2096.0, 2000.0) );
-        intArr.push_back( new TH1F( intName.c_str( ), intName.c_str( ), 100, -20000.0, 40000.0) );
-        max_intArr.push_back( new TH2F( max_intName.c_str( ), max_intName.c_str( ), 4096, -2096.0, 2000.0, 100, -20000.0, 40000.0) );
+        intArr.push_back( new TH1F( intName.c_str( ), intName.c_str( ), 1000, -20000.0, 40000.0) );
+        max_intArr.push_back( new TH2F( max_intName.c_str( ), max_intName.c_str( ), 4096, -2096.0, 2000.0, 1000, -20000.0, 40000.0) );
     }
 
     TFile file( inputFile.c_str( ) );
