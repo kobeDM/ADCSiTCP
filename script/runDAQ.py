@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import subprocess, os, sys
 import datetime
@@ -17,8 +17,6 @@ def parser():
 
 
 def main( ):
-
-    print("### read config ###")
 
     print("### run ADCSiTCP DAQ ###")
     

@@ -40,8 +40,8 @@ def main():
         # bit1: RATE      ... 00: 40MHz, 01: 20MHz
         # bit0: RATE      ... 10: 10MHz, 11:  5MHz
 
-        rbcp.write_register_f(ip_address, 0x4,  '>B', 0x20) # 40MHz, self, 2048clock, ch0-7 -> Fe
-        #rbcp.write_register_f(ip_address, 0x4,  '>B', 0x00)# 40MHz, ext1, 2048clock, ch0-7 -> muon
+        # rbcp.write_register_f(ip_address, 0x4,  '>B', 0x20) # 40MHz, self, 2048clock, ch0-7 -> Fe
+        rbcp.write_register_f(ip_address, 0x4,  '>B', 0x00)# 40MHz, ext1, 2048clock, ch0-7 -> muon
 
         #######################################################
         # trigger position register (0x00000008, 0x00000009)
