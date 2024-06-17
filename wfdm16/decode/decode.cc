@@ -36,14 +36,14 @@ int main(int argc, char *argv[])
     int   hCH_NUM  = 0, hDT_LEN  = 0, hREC_LEN = 0; // word 3
     
     int   fadcVar[NUM_CH][MAX_SAMPLING] = {};
-    pTree->Branch( "fadc0", fadcVar[0], "fadc0[4096]/I" );
-    pTree->Branch( "fadc1", fadcVar[1], "fadc1[4096]/I" );
-    pTree->Branch( "fadc2", fadcVar[2], "fadc2[4096]/I" );
-    pTree->Branch( "fadc3", fadcVar[3], "fadc3[4096]/I" );
-    pTree->Branch( "fadc4", fadcVar[4], "fadc4[4096]/I" );
-    pTree->Branch( "fadc5", fadcVar[5], "fadc5[4096]/I" );
-    pTree->Branch( "fadc6", fadcVar[6], "fadc6[4096]/I" );
-    pTree->Branch( "fadc7", fadcVar[7], "fadc7[4096]/I" );
+    pTree->Branch( "fadc0", fadcVar[0], Form("fadc0[%d]/I", MAX_SAMPLING) );
+    pTree->Branch( "fadc1", fadcVar[1], Form("fadc1[%d]/I", MAX_SAMPLING) );
+    pTree->Branch( "fadc2", fadcVar[2], Form("fadc2[%d]/I", MAX_SAMPLING) );
+    pTree->Branch( "fadc3", fadcVar[3], Form("fadc3[%d]/I", MAX_SAMPLING) );
+    pTree->Branch( "fadc4", fadcVar[4], Form("fadc4[%d]/I", MAX_SAMPLING) );
+    pTree->Branch( "fadc5", fadcVar[5], Form("fadc5[%d]/I", MAX_SAMPLING) );
+    pTree->Branch( "fadc6", fadcVar[6], Form("fadc6[%d]/I", MAX_SAMPLING) );
+    pTree->Branch( "fadc7", fadcVar[7], Form("fadc7[%d]/I", MAX_SAMPLING) );
 
     std::cout << "Decode start." << std::endl;
     while( !ifs.eof( ) ) {

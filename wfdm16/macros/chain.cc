@@ -1,18 +1,14 @@
-#include <string.h>
-#include <fstream>
+#include "inc/shinclude.h"
 
-#include "TChain.h"
-
-void chain(const std::string chainListPath) {
-	const std::string header = "chain";
-
-	std::ifstream ifs(chainListPath);
+void chain( const std::string chainListPath, const std::string outputFilePath ) {
+	
+	std::ifstream ifs( chainListPath );
 	if (!ifs) {
 		std::cout << "Error: Chain list cannot open !!" << std::endl;
 		return;
 	}
 
-	TChain *chain = new TChain("tree", "tree");
+	TChain *chain = new TChain( "tree", "tree" );
 	std::string line;
 
 	while(getline(ifs, line)) {
@@ -20,8 +16,8 @@ void chain(const std::string chainListPath) {
 		chain->Add(line.c_str());
 	}
 
-	chain->Merge(Form("%s.root",header.c_str()),"recreate");
-	std::cout << "Chain file was created" << std::endl;
+	chain->Merge( outputFilePath.c_str(), "recreate" );
+	std::cout << "Chain file was created successfully." << std::endl;
 
 	return;
 }
