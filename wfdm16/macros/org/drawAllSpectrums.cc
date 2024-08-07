@@ -1,6 +1,6 @@
 #include "inc/shinclude.h"
 
-void drawSpectrum( const String& inputFile, const String& outputDir )
+void drawAllSpectrums( const String& inputFile, const String& outputDir )
 {
     SetShStyle( );
     ShUtil::ExistCreateDir( outputDir );
@@ -76,7 +76,7 @@ void drawSpectrum( const String& inputFile, const String& outputDir )
 
             // DEBUG(pedestal);
             double maxHight = pedestal;
-            double intCharge = 0.0;;
+            double intCharge = 0.0;
             // for( int clk = 400; clk < 2048; ++clk ) {
             for( int clk = 400; clk < 1000; ++clk ) {
                 if( fadcVar[ch][clk] > maxHight ) maxHight = static_cast< double >( fadcVar[ch][clk] );
