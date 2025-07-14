@@ -35,7 +35,7 @@ $ cd YYYYMMDD
 $ runDAQ.py -r [RUN TYPE e.g. DM, 252Cf, 241Am, ... (default: work)] -n [#events per file (default: 1000)] 
 ```
 ## to compile wfdm16 in UBUNTU 24
-$edit Makefile
+edit Makefile
 
 ```
 CXXFLAGS=${ROOTFLAGS} -std=c++14
